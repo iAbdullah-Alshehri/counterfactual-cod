@@ -1,0 +1,4 @@
+image,label,mask,ground_truth,split,image_id
+images/example_co.jpg,CO,predictions/example_co.png,masks/example_co.png,train,example_co
+images/example_bg.jpg,BG,predictions/example_bg.png,,train,example_bg
+images/example_nocod.jpg,NOCOD,predictions/example_nocod.png,,train,example_nocod

@@ -1,0 +1,118 @@
+\begin{thebibliography}{14}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bhattad et~al.(2025)Bhattad, Preechakul, and Efros]{visualjenga}
+Anand Bhattad, Konpat Preechakul, and Alexei~A. Efros.
+\newblock Visual jenga: Discovering object dependencies via counterfactual
+  inpainting.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2025.
+\newblock URL
+  \url{https://papers.nips.cc/paper_files/paper/2025/hash/ea7efe35cef8808c2fa66c349671a73d-Abstract-Conference.html}.
+
+\bibitem[Chen et~al.(2026)Chen, Lyu, Si, Tan, Guo, and Shan]{opc16k}
+Huafeng Chen, Yueming Lyu, Chenyang Si, Wende Tan, Liucheng Guo, and Caifeng
+  Shan.
+\newblock Is there really a camouflaged object? towards realistic camouflaged
+  object detection, 2026.
+\newblock URL \url{https://arxiv.org/abs/2608.11135}.
+\newblock arXiv preprint.
+
+\bibitem[Fan et~al.(2017)Fan, Cheng, Liu, Li, and Borji]{sm}
+Deng-Ping Fan, Ming-Ming Cheng, Yun Liu, Tao Li, and Ali Borji.
+\newblock Structure-measure: A new way to evaluate foreground maps.
+\newblock In \emph{Proceedings of the IEEE International Conference on Computer
+  Vision}, 2017.
+\newblock URL \url{https://arxiv.org/abs/1708.00786}.
+
+\bibitem[Fan et~al.(2018)Fan, Gong, Cao, Ren, Cheng, and Borji]{em}
+Deng-Ping Fan, Cheng Gong, Yang Cao, Bo~Ren, Ming-Ming Cheng, and Ali Borji.
+\newblock Enhanced-alignment measure for binary foreground map evaluation.
+\newblock In \emph{Proceedings of the International Joint Conference on
+  Artificial Intelligence}, 2018.
+\newblock URL \url{https://www.ijcai.org/Proceedings/2018/0097.pdf}.
+
+\bibitem[Fan et~al.(2022)Fan, Ji, Cheng, and Shao]{sinetv2}
+Deng-Ping Fan, Ge-Peng Ji, Ming-Ming Cheng, and Ling Shao.
+\newblock Concealed object detection.
+\newblock \emph{IEEE Transactions on Pattern Analysis and Machine
+  Intelligence}, 44\penalty0 (10):\penalty0 6024--6042, 2022.
+\newblock \doi{10.1109/TPAMI.2021.3085766}.
+
+\bibitem[He et~al.(2025)He, Zhang, Xiao, Fang, Tang, Zhang, Kong, Fan, Li, and
+  Farsiu]{run}
+Chunming He, Rihan Zhang, Fengyang Xiao, Chenyu Fang, Longxiang Tang, Yulun
+  Zhang, Linghe Kong, Deng-Ping Fan, Kai Li, and Sina Farsiu.
+\newblock {RUN}: Reversible unfolding network for concealed object
+  segmentation, 2025.
+\newblock URL \url{https://arxiv.org/abs/2501.18783}.
+
+\bibitem[Li et~al.(2026)Li, Yoshie, and Ieiri]{cfcamo}
+Suhang Li, Osamu Yoshie, and Yuya Ieiri.
+\newblock {CFCamo}: A counterfactual detect-or-abstain framework for
+  camouflaged object detection, 2026.
+\newblock URL \url{https://arxiv.org/abs/2606.11231}.
+\newblock arXiv preprint.
+
+\bibitem[Margolin et~al.(2014)Margolin, Zelnik-Manor, and Tal]{wfm}
+Ran Margolin, Lihi Zelnik-Manor, and Ayellet Tal.
+\newblock How to evaluate foreground maps?
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
+  Pattern Recognition}, 2014.
+\newblock URL \url{https://doi.org/10.1109/CVPR.2014.85}.
+
+\bibitem[{PySODMetrics contributors}(2024)]{pysod}
+{PySODMetrics contributors}.
+\newblock {PySODMetrics}: Python toolkit for salient object detection metrics.
+\newblock GitHub repository, 2024.
+\newblock URL \url{https://github.com/lartpang/PySODMetrics}.
+\newblock Project used version 1.6.2; reports validation against the CODToolbox
+  implementation.
+
+\bibitem[Suvorov et~al.(2022)Suvorov, Logacheva, Mashikhin, Remizova, Ashukha,
+  Silvestrov, Kong, Goka, Park, and Lempitsky]{lama}
+Roman Suvorov, Elizaveta Logacheva, Anton Mashikhin, Anastasia Remizova,
+  Arsenii Ashukha, Aleksei Silvestrov, Naejin Kong, Harshith Goka, Kiwoong
+  Park, and Victor Lempitsky.
+\newblock Resolution-robust large mask inpainting with fourier convolutions.
+\newblock In \emph{Proceedings of the IEEE/CVF Winter Conference on
+  Applications of Computer Vision}, pages 2149--2159, 2022.
+\newblock URL
+  \url{https://openaccess.thecvf.com/content/WACV2022/html/Suvorov_Resolution-Robust_Large_Mask_Inpainting_With_Fourier_Convolutions_WACV_2022_paper.html}.
+
+\bibitem[Xiao et~al.(2024)Xiao, Hu, Shen, Fang, Huang, He, Tang, Yang, and
+  Li]{xiaoSurvey}
+Fengyang Xiao, Sujie Hu, Yuqi Shen, Chengyu Fang, Jinfa Huang, Chunming He,
+  Longxiang Tang, Ziyun Yang, and Xiu Li.
+\newblock A survey of camouflaged object detection and beyond, 2024.
+\newblock URL \url{https://arxiv.org/abs/2408.14562}.
+
+\bibitem[Xin et~al.(2025)Xin, Wu, Chen, Ye, Xie, Zou, You, and Guo]{rcod}
+Zhimeng Xin, Tianxu Wu, Shiming Chen, Shuo Ye, Zijing Xie, Yixiong Zou, Xinge
+  You, and Yufei Guo.
+\newblock Toward realistic camouflaged object detection: Benchmarks and method,
+  2025.
+\newblock URL \url{https://arxiv.org/abs/2501.07297}.
+
+\bibitem[Zhao et~al.(2025)Zhao, Fan, Cheng, Khan, Khan, Clifton, Xu, and
+  Yang]{zhaoSurvey}
+Pancheng Zhao, Deng-Ping Fan, Shupeng Cheng, Salman~H. Khan, Fahad~Shahbaz
+  Khan, David~A. Clifton, Peng Xu, and Jufeng Yang.
+\newblock Deep learning in concealed dense prediction, 2025.
+\newblock URL \url{https://arxiv.org/abs/2504.10979}.
+
+\bibitem[Zhou et~al.(2025)Zhou, Li, Zhong, Huang, Pei, Li, and Tang]{usc12k}
+Zhangjun Zhou, Yiping Li, Chunlin Zhong, Jianuo Huang, Jialun Pei, Hua Li, and
+  He~Tang.
+\newblock Rethinking detecting salient and camouflaged objects in unconstrained
+  scenes.
+\newblock In \emph{Proceedings of the IEEE/CVF International Conference on
+  Computer Vision}, pages 22372--22382, 2025.
+\newblock \doi{10.1109/ICCV51701.2025.02077}.
+\newblock URL
+  \url{https://openaccess.thecvf.com/content/ICCV2025/html/Zhou_Rethinking_Detecting_Salient_and_Camouflaged_Objects_in_Unconstrained_Scenes_ICCV_2025_paper.html}.
+
+\end{thebibliography}

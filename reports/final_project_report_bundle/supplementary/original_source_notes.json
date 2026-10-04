@@ -1,0 +1,23 @@
+[
+  "DATASETS.md",
+  "data/experiments/usc12k/full/val\\_manifest.csv; README.md",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_summary.json",
+  "README.md; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json",
+  "README.md; data/experiments/usc12k\\_feature\\_band/calibration/BAND\\_CALIBRATION.md; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json",
+  "README.md; data/experiments/usc12k\\_feature\\_band/calibration/BAND\\_CALIBRATION.md",
+  "README.md; data/experiments/usc12k/validation/calibration/class\\_structure/CLASS\\_DIAGNOSTICS.md",
+  "data/experiments/cod10k\\_matched/analysis/MATCHED\\_DIAGNOSTICS.md; data/experiments/cod10k\\_feature\\_only/usc\\_sanity/FEATURE\\_SANITY.md",
+  "data/experiments/usc12k\\_feature\\_band/calibration/BAND\\_CALIBRATION.md; data/experiments/usc12k\\_feature\\_band/heldout/USC\\_BAND\\_HOLDOUT.md",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_refine/summary.json",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_summary.json (fields: bootstrap\\_replicates, seed, and bootstrap\\_95\\_ci)",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_per\\_image.csv; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_summary.json",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/pysodmetrics\\_three\\_condition\\_table.csv; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/pysodmetrics\\_validation.json; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/PYSODMETRICS\\_VALIDATION.md",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/pysodmetrics\\_three\\_condition\\_table.csv",
+  "data/experiments/usc12k/full/val\\_manifest.csv; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_per\\_image.csv; reports/final\\_project\\_report/tables/qualitative\\_cases.csv",
+  "README.md; data/experiments/usc12k/validation/calibration/class\\_structure/CLASS\\_DIAGNOSTICS.md; data/experiments/cod10k\\_matched/analysis/MATCHED\\_DIAGNOSTICS.md; data/experiments/cod10k\\_feature\\_only/calibration/FEATURE\\_RULE.md; data/experiments/cod10k\\_feature\\_only/usc\\_sanity/FEATURE\\_SANITY.md; data/experiments/usc12k\\_feature\\_band/calibration/BAND\\_CALIBRATION.md; data/experiments/usc12k\\_feature\\_band/heldout/USC\\_BAND\\_HOLDOUT.md",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_summary.json; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_summary.json",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_per\\_image.csv (raw nonempty-mask counts); data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_summary.json (raw and verified negative mask areas); data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_refine/summary.json",
+  "project\\_proposal\\_draft\\_4.pdf; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/posthoc\\_summary.json; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/pysodmetrics\\_three\\_condition\\_table.csv; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/feature\\_band\\_verify/summary.json",
+  "data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/pysodmetrics\\_three\\_condition\\_table.csv; data/experiments/usc12k/full/feature\\_band\\_lama\\_full/posthoc\\_analysis/pysodmetrics\\_validation.json"
+]

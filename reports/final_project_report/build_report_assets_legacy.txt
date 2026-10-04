@@ -1,0 +1,178 @@
+"""Build report figures from saved USC12K artifacts only; no model inference."""
+from __future__ import annotations
+
+import csv
+import json
+from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = Path(__file__).resolve().parent / "figures"
+EXP = ROOT / "data/experiments/usc12k/full"
+RUN = EXP / "feature_band_lama_full"
+POST = RUN / "posthoc_analysis"
+OUT.mkdir(parents=True, exist_ok=True)
+
+FONT_PATH = Path("C:/Windows/Fonts/arial.ttf")
+FONT_BOLD_PATH = Path("C:/Windows/Fonts/arialbd.ttf")
+
+
+def font(size: int, bold: bool = False):
+    path = FONT_BOLD_PATH if bold else FONT_PATH
+    try:
+        return ImageFont.truetype(str(path), size)
+    except OSError:
+        return ImageFont.load_default()
+
+
+def pipeline():
+    w, h = 1600, 370
+    im = Image.new("RGB", (w, h), "white")
+    d = ImageDraw.Draw(im)
+    labels = [
+        ("I", "Input image"),
+        ("M0", "Frozen SINet-V2\ncandidate mask"),
+        ("Ibg", "LaMa inpaint after\n5-pixel dilation"),
+        ("R", "ResNet-18 layer2\ncosine feature residual"),
+        ("Mfinal", "Band decision\nBG / CO / NOCOD"),
+    ]
+    left, gap, bw, bh, y = 40, 38, 260, 125, 95
+    colors = ["#eaf2f8", "#e8f6f3", "#fff4e5", "#f0eafa", "#e7f2e2"]
+    for i, (head, body) in enumerate(labels):
+        x = left + i * (bw + gap)
+        d.rounded_rectangle((x, y, x + bw, y + bh), radius=18, fill=colors[i], outline="#46566b", width=3)
+        d.text((x + 15, y + 15), head, font=font(34, True), fill="#152336")
+        d.multiline_text((x + 15, y + 60), body, font=font(22), fill="#26384a", spacing=4)
+        if i < len(labels) - 1:
+            x0 = x + bw + 5
+            x1 = x + bw + gap - 5
+            mid = y + bh // 2
+            d.line((x0, mid, x1 - 10, mid), fill="#40566e", width=5)
+            d.polygon([(x1 - 10, mid - 11), (x1 + 3, mid), (x1 - 10, mid + 11)], fill="#40566e")
+    d.text((45, 270), "Residuals: appearance (RGB), feature (frozen embedding), structural (Canny edges).",
+           font=font(21), fill="#26384a")
+    d.text((45, 308), "Final rule uses feature only: score < 0.185 -> BG; 0.185 to 0.285 -> CO; score > 0.285 -> NOCOD.",
+           font=font(20), fill="#26384a")
+    im.save(OUT / "pipeline.png", dpi=(180, 180))
+
+
+def confusion():
+    data = json.loads((POST / "posthoc_summary.json").read_text(encoding="utf-8"))
+    mat = data["classification"]["feature_band_verify"]["confusion_matrix_true_rows_predicted_columns"]
+    names = ["BG", "CO", "NOCOD"]
+    cell, left, top = 205, 290, 190
+    im = Image.new("RGB", (1050, 890), "white")
+    d = ImageDraw.Draw(im)
+    d.text((left, 35), "Confusion matrix — true rows, predicted columns", font=font(30, True), fill="#17263a")
+    d.text((left, 90), "USC12K saved full-split predictions (counts)", font=font(22), fill="#40566e")
+    for j, name in enumerate(names):
+        d.text((left + cell * j + 58, top - 44), name, font=font(24, True), fill="#17263a")
+    for i, name in enumerate(names):
+        d.text((left - 125, top + cell * i + 75), name, font=font(24, True), fill="#17263a")
+        for j, value in enumerate(mat[i]):
+            x, y = left + cell * j, top + cell * i
+            intensity = value / max(max(row) for row in mat)
+            blue = int(244 - 133 * intensity)
+            color = (blue - 10, blue, 255)
+            d.rectangle((x, y, x + cell - 8, y + cell - 8), fill=color, outline="#ffffff", width=4)
+            d.text((x + 59, y + 66), str(value), font=font(42, True), fill="#152336")
+    d.text((left, top + 3 * cell + 20), "Class order: BG, CO, NOCOD. Source: saved posthoc_summary.json.",
+           font=font(18), fill="#40566e")
+    im.save(OUT / "confusion_matrix.png", dpi=(180, 180))
+
+
+def bars():
+    rows = list(csv.DictReader((POST / "pysodmetrics_three_condition_table.csv").open(encoding="utf-8-sig")))
+    metrics = [
+        ("S_alpha", "S-alpha", 0.8),
+        ("weighted_F_beta", "Weighted F-beta", 0.6),
+        ("E_m_adaptive", "Adaptive E-measure", 0.85),
+        ("MAE", "MAE (lower is better)", 0.09),
+    ]
+    labels = ["Raw", "Verify", "Refine"]
+    palette = ["#477db3", "#e09f3e", "#6a994e"]
+    panel_w, panel_h = 460, 480
+    im = Image.new("RGB", (panel_w * 4, panel_h), "white")
+    d = ImageDraw.Draw(im)
+    for k, (key, title, ymax) in enumerate(metrics):
+        x0 = k * panel_w
+        d.text((x0 + 30, 22), title, font=font(25, True), fill="#17263a")
+        gx0, gy0, gw, gh = x0 + 70, 90, 340, 300
+        d.line((gx0, gy0, gx0, gy0 + gh), fill="#34495e", width=3)
+        d.line((gx0, gy0 + gh, gx0 + gw, gy0 + gh), fill="#34495e", width=3)
+        for tick in range(5):
+            v = ymax * tick / 4
+            yy = gy0 + gh - int(gh * v / ymax)
+            d.line((gx0, yy, gx0 + gw, yy), fill="#e0e5ea", width=1)
+            d.text((gx0 - 56, yy - 11), f"{v:.2f}", font=font(15), fill="#516273")
+        for j, row in enumerate(rows):
+            value = float(row[key])
+            bx = gx0 + 32 + j * 100
+            bh = int(gh * value / ymax)
+            d.rectangle((bx, gy0 + gh - bh, bx + 58, gy0 + gh), fill=palette[j])
+            d.text((bx - 7, gy0 + gh - bh - 27), f"{value:.3f}", font=font(15, True), fill="#17263a")
+            d.text((bx - 4, gy0 + gh + 14), labels[j], font=font(16), fill="#26384a")
+        d.text((x0 + 26, 445), "PySODMetrics 1.6.2; same CO masks/GT", font=font(15), fill="#516273")
+    im.save(OUT / "pysodmetrics_grouped_bars.png", dpi=(180, 180))
+
+
+def qualitative():
+    with (EXP / "val_manifest.csv").open(encoding="utf-8-sig", newline="") as f:
+        manifest = {r["image_id"]: r for r in csv.DictReader(f)}
+    with (POST / "posthoc_per_image.csv").open(encoding="utf-8-sig", newline="") as f:
+        pred = list(csv.DictReader(f))
+    classes = ["CO", "BG", "NOCOD"]
+    size = (360, 230)
+    im = Image.new("RGB", (size[0] * 2, size[1] * 3 + 105), "white")
+    d = ImageDraw.Draw(im)
+    d.text((25, 12), "Saved real examples; green outline = raw SINet-V2 candidate", font=font(24, True), fill="#17263a")
+    d.text((25, 48), "Success = predicted class matches label; failure = mismatch. Images are not generated.", font=font(18), fill="#40566e")
+    chosen = []
+    for row_i, cls in enumerate(classes):
+        good = next(r for r in pred if r["label"] == cls and r["predicted_label"] == cls)
+        bad = next(r for r in pred if r["label"] == cls and r["predicted_label"] != cls)
+        for col_i, (row, state) in enumerate([(good, "SUCCESS"), (bad, "FAILURE")]):
+            chosen.append((cls, state, row))
+            rec = manifest[str(row["image_id"])]
+            src = Path(rec["image"])
+            mask_path = Path(rec["mask"])
+            photo = Image.open(src).convert("RGB")
+            mask = Image.open(mask_path).convert("L")
+            mask = mask.resize(photo.size, Image.Resampling.NEAREST)
+            # Draw the actual candidate as a translucent green overlay; no synthetic pixels.
+            overlay = Image.new("RGBA", photo.size, (0, 0, 0, 0))
+            pix = overlay.load()
+            mp = mask.load()
+            for yy in range(photo.height):
+                for xx in range(photo.width):
+                    if mp[xx, yy] > 127:
+                        pix[xx, yy] = (36, 210, 100, 72)
+            panel = Image.alpha_composite(photo.convert("RGBA"), overlay).convert("RGB")
+            panel.thumbnail(size, Image.Resampling.LANCZOS)
+            x = col_i * size[0]
+            y = 82 + row_i * size[1]
+            im.paste(panel, (x, y))
+            pred_name = row["predicted_label"]
+            d.rectangle((x, y + size[1] - 46, x + size[0], y + size[1]), fill="white")
+            d.text((x + 8, y + size[1] - 40), f"{cls} {state} | predicted {pred_name}",
+                   font=font(16, True), fill="#17263a")
+    im.save(OUT / "qualitative_cases.png", dpi=(180, 180))
+
+    table_dir = Path(__file__).resolve().parent / "tables"
+    table_dir.mkdir(exist_ok=True)
+    with (table_dir / "qualitative_cases.csv").open("w", encoding="utf-8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["true_class", "panel_status", "image_id", "predicted_class", "image_file", "candidate_mask_file"])
+        for cls, status, row in chosen:
+            rec = manifest[str(row["image_id"])]
+            writer.writerow([cls, status, row["image_id"], row["predicted_label"],
+                             Path(rec["image"]).relative_to(ROOT), Path(rec["mask"]).relative_to(ROOT)])
+
+
+if __name__ == "__main__":
+    pipeline()
+    confusion()
+    bars()
+    qualitative()
+    print(f"Report figures written to {OUT}")

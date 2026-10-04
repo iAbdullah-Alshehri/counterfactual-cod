@@ -1,0 +1,195 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black}
+\setlength{\parskip}{0.55em}
+\setlength{\parindent}{0pt}
+\captionsetup{font=small,labelfont=bf}
+\newcommand{\src}[1]{\par\vspace{0.25em}{\scriptsize\textit{Saved-project source(s):}\\\begingroup\path{#1}\par\endgroup}}
+\newcommand{\metric}[1]{\texttt{#1}}
+\title{Counterfactual Background Reconstruction for Realistic Camouflaged Object Detection\\[0.4em]
+\large Project Progress, Full-Split Evaluation, and Critical Assessment}
+\author{Master's Research Project Report}
+\date{Prepared for thesis-advisor review\\3 October 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents the complete proposal-to-evaluation path for a post-hoc counterfactual verification layer for realistic camouflaged-object detection (COD). The system starts from a frozen SINet-V2 candidate mask, removes and inpaints the candidate region with LaMa, and scores the difference between the original image and its reconstructed-background counterfactual. Early experiments exposed serious source/class confounding: appearance and structural fusion did not transfer even to a small COD10K-matched negative set, and a feature-only direction selected on COD10K inverted on USC12K salient-object negatives. A frozen two-cut band was therefore calibrated on small USC12K training-derived samples and then applied to the saved official evaluation manifest. The full split yielded three-way accuracy \(0.7122\), macro-F1 \(0.7018\), and negative false acceptance \(0.2883\), with class-stratified bootstrap intervals reported below. A final independent metric check with PySODMetrics shows that the verifier and the refinement output do not improve CO segmentation quality over the raw SINet-V2 masks: raw masks have the best S-alpha, weighted F-beta, and adaptive E-measure, while verification has only a very small MAE advantage. The project therefore provides a useful, carefully audited investigation of open-world failure modes and a measurable negative-rejection add-on, but it does not establish a new state-of-the-art segmenter or source-independent camouflage detector.
+
+All project-result numbers in this report are tied to the exact saved artifact paths printed in tables, captions, or adjacent source notes. No SINet-V2 or LaMa inference was run to prepare this report. Figures were assembled from saved metrics, saved images, and saved masks.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+\section{Introduction and recap}
+\subsection{Research question and proposed pipeline}
+The proposal asks whether a candidate object can be tested counterfactually: if the candidate is removed and the surrounding scene is plausibly reconstructed, does the discrepancy between the original image and the reconstructed image provide evidence that the candidate is camouflaged? The proposed pipeline is
+\[
+ I \longrightarrow M_0 \longrightarrow \hat I_{bg} \longrightarrow R \longrightarrow M_{final},
+\]
+where \(I\) is the input, \(M_0\) is the initial frozen detector mask, \(\hat I_{bg}\) is an inpainted image after the candidate region has been masked, \(R\) is a residual evidence representation, and \(M_{final}\) is the retained or refined mask. The proposal's hypothesis is that a real camouflaged object may blend into the scene enough that its removal produces a different residual signature from a salient non-camouflaged object or a scene with no foreground object. The intended contribution was an empirical analysis of residual types and an evaluation of their use in negative rejection and mask refinement, not a new inpainting architecture. The original proposal is the project source for these questions. [Source: supplied proposal file, \texttt{project\_proposal\_draft\_4.pdf}]
+
+\subsection{Why USC12K replaced OPC16K}
+OPC16K was the proposal's preferred realistic benchmark. At the time this project recorded its acquisition status, the OPC16K authors' repository listed its public release as forthcoming; the archive was therefore not available through the project's official-source-only download procedure. USC12K had an author-provided image/annotation release and supported a full saved evaluation, so it became the practical benchmark. The report does not claim that OPC16K remains unavailable today; the status statement is limited to the project's acquisition record. RCOD was also downloaded, but its annotations are object-detection boxes rather than the pixel masks required for this project's segmentation/refinement experiments. \citep{opc16k,usc12k,rcod}
+\src{DATASETS.md}
+
+\section{Methodology}
+\subsection{Dataset and evaluation protocol}
+The saved manifest contains 3,600 USC12K examples: 1,800 CO, 900 BG, and 900 NOCOD. The manifest's split field is \texttt{usc12k\_official\_val}, and the dataset builder derives this evaluation split from the official \texttt{val.txt} list. To avoid ambiguity, this report calls it the \emph{official evaluation split}; it does not rename it an official test split. The image labels map the dataset's four scenes as follows: Scene A to NOCOD, Scene B to CO, Scene C to CO because camouflage is present alongside salient content, and Scene D to BG. The published USC12K dataset explicitly includes scenarios for salient and camouflaged objects in unconstrained scenes; the project's label mapping is a project-specific reduction to the three requested classes. \citep{usc12k}
+\src{data/experiments/usc12k/full/val\_manifest.csv; README.md}
+
+The split was evaluated and inspected before this report. Consequently, the confidence intervals below quantify image resampling variability within this already-inspected split. They do not turn it into a fresh blind test, correct for source shift, or justify choosing a model after looking at the results. The saved post-hoc analysis itself marks this limitation explicitly.
+\src{data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/posthoc\_summary.json}
+
+\subsection{Frozen baseline, reconstruction, and residuals}
+The raw candidate generator is the frozen SINet-V2 COD segmentation model; this project did not retrain it. For each image, the candidate mask is dilated by 5 pixels and passed to the LaMa inpainting backend, which fills the masked area and yields \(\hat I_{bg}\). LaMa is used as a counterfactual reconstruction tool, not as evidence that the reconstructed image is a unique or ground-truth background. The saved full run used the LaMa ONNX backend on CPU. The frozen feature residual uses an ImageNet-pretrained ResNet-18 layer2 representation: the original image and \(\hat I_{bg}\) are resized to 256 by 256, normalized, embedded, and compared by cosine distance. \citep{sinetv2,lama}
+\src{README.md; data/experiments/usc12k/full/feature\_band\_lama\_full/feature\_band\_verify/summary.json}
+
+The system implemented three residual signals. Appearance is mean absolute RGB difference in the candidate region; feature is the cosine distance between frozen ResNet-18 layer2 embeddings; structural is a discrepancy between Canny edge maps. The combined residual was initially an equal-weight or calibrated scalar score, but it is not a probability. The final decision uses only the feature residual, with appearance and structural weights set to zero. The three-way rule is: predict BG for score below 0.185, predict CO for score from 0.185 through 0.285 inclusive, and predict NOCOD above 0.285. A predicted CO retains the candidate; a BG or NOCOD decision suppresses it. These cut points are train-derived choices, not universal thresholds. The CO measures used in this report follow standard foreground-map evaluation protocols and are recomputed with PySODMetrics. \citep{sm,wfm,em,pysod}
+\src{README.md; data/experiments/usc12k\_feature\_band/calibration/BAND\_CALIBRATION.md; data/experiments/usc12k/full/feature\_band\_lama\_full/feature\_band\_verify/summary.json}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/pipeline.png}
+\caption{Implemented counterfactual pipeline and frozen feature-band rule. The figure is a schematic of the saved configuration, not a new experiment. The band and residual definitions are sourced from the README and calibration record.}
+\label{fig:pipeline}
+\src{README.md; data/experiments/usc12k\_feature\_band/calibration/BAND\_CALIBRATION.md}
+\end{figure}
+
+\subsection{Calibration journey and pitfalls}
+The first binary calibration used only a 60-image training-derived set, 20 per class. It selected low-score acceptance with threshold 0.10 and weights appearance 0.25, feature 0.00, and structural 0.75, attaining a tuning accuracy of 0.817. This was a tuning score rather than an unbiased test estimate. Source families did not overlap across the training-derived label pools, so source identity and class were fully confounded. The model could exploit dataset style rather than camouflage. \src{README.md; data/experiments/usc12k/validation/calibration/class\_structure/CLASS\_DIAGNOSTICS.md}
+
+A same-source diagnostic compared COD10K-CAM positives to COD10K-NonCAM negatives. Under the frozen combined score, low-score CO-positive AUROC was 0.424 (bootstrap 95\% CI 0.270--0.587), essentially demonstrating collapse of the selected combined rule under this controlled source comparison. The feature component alone reached AUROC 0.902 in the high-is-CO orientation on this small diagnostic, but a separate feature-only rule calibrated on COD10K then failed to transfer to real USC12K NOCOD. Its CO-vs-NOCOD AUROC was 0.093 (95\% CI 0.000--0.227), with the frozen high-score direction treating the NOCOD examples as more CO-like. This is evidence of a direction inversion in that small sample, not a reason to flip the direction after seeing those rows. \src{data/experiments/cod10k\_matched/analysis/MATCHED\_DIAGNOSTICS.md; data/experiments/cod10k\_feature\_only/usc\_sanity/FEATURE\_SANITY.md}
+
+The calibration design was therefore changed to a two-cut, three-class feature-only rule using USC12K training-derived data. On 40 calibration examples per class, the selected cuts were 0.185 and 0.285, with calibration accuracy 0.708 and macro-F1 0.709. The frozen rule was then checked on a disjoint 15-per-class training-derived holdout; accuracy was 0.667 and macro-F1 0.672. Both results are small-sample development results, not estimates of population performance. The label/source association in USC12K remains, so this holdout does not establish source-independent generalization. \src{data/experiments/usc12k\_feature\_band/calibration/BAND\_CALIBRATION.md; data/experiments/usc12k\_feature\_band/heldout/USC\_BAND\_HOLDOUT.md}
+
+\input{tables/calibration_journey.tex}
+
+\subsection{Runtime and compute caveat}
+The full verifier processed the saved 3,600-row manifest with no residual-cache hits. Its saved mean time was 6.067924718557107 seconds per image, including mean inpainting time of 5.597485009890128 seconds per image; total time was 22,164.16736839991 seconds. This is not a lightweight runtime in an absolute sense on the available CPU. The refinement pass was much shorter because it reused 3,600 cached residuals; that cached timing must not be confused with a clean end-to-end runtime. The phrase ``lightweight add-on'' refers to the small frozen post-hoc decision rule and no extra learned segmenter training, not low wall-clock cost when fresh inpainting is required.
+\src{data/experiments/usc12k/full/feature\_band\_lama\_full/feature\_band\_verify/summary.json; data/experiments/usc12k/full/feature\_band\_lama\_full/feature\_band\_refine/summary.json}
+
+\section{Results}
+\subsection{Three-way classification on the saved official evaluation split}
+The final rule produced three-way accuracy 0.7122222 and macro-F1 0.7018039. The class-specific recalls were 0.6833333 for BG, 0.7594444 for CO, and 0.6466667 for NOCOD. The reported class-stratified image-bootstrap intervals use 2,000 replicates and seed 20261001. The intervals and saved full-split confusion matrix appear in Tables~\ref{tab:classification} and~\ref{tab:confusion}; Figure~\ref{fig:confusion} visualizes the same saved counts. The dominant errors are CO-to-NOCOD (292 images) and BG-to-CO (270), so the classifier is not reliably resolving camouflage from salient-object negatives. Verify and refine share the same classifier outputs because refinement changes masks, not the feature-band class decision.
+
+\input{tables/classification.tex}
+\input{tables/confusion.tex}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{figures/confusion_matrix.png}
+\caption{Saved official evaluation split confusion matrix. Rows are true classes and columns are predicted classes in BG, CO, NOCOD order. Counts and ordering are taken from the post-hoc summary.}
+\label{fig:confusion}
+\src{data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/posthoc\_summary.json (fields: bootstrap\_replicates, seed, and bootstrap\_95\_ci)}
+\end{figure}
+
+\subsection{Negative rejection compared with raw candidate masks}
+Without verification, every BG and NOCOD item in the saved manifest has a nonempty raw SINet-V2 candidate mask: the saved post-hoc per-image table contains 900 of 900 nonempty BG masks and 900 of 900 nonempty NOCOD masks. Under the explicit operational definition ``candidate mask is nonempty means accepted as an object,'' the raw baseline therefore falsely accepts 1,800 of 1,800 negative images (rate 1.0000). The feature-band verifier falsely accepts 0.2883333 of negative images (95\% stratified bootstrap CI 0.2677778--0.3088889), or rejects 0.7116667. The reduction is a real, useful negative-rejection result for this split. It comes with a CO acceptance rate of 0.7594444, so 0.2405556 of CO images are rejected. The binary CO-vs-negative accuracy is 0.7355556. This comparison concerns image-level acceptance; it does not claim better segmentation masks.
+\src{data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/posthoc\_per\_image.csv; data/experiments/usc12k/full/feature\_band\_lama\_full/feature\_band\_verify/summary.json; data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/posthoc\_summary.json}
+\input{tables/negative_mask_area.tex}
+
+\subsection{CO segmentation: consistent PySODMetrics comparison}
+The final table uses PySODMetrics 1.6.2 on the same saved CO masks and ground truths for raw, verify, and refine. Raw means saved SINet-V2 candidate masks with verification disabled. Verify suppresses candidate masks when the feature rule predicts BG or NOCOD. Refine additionally transforms the retained masks using cached residual maps; no SINet-V2 or LaMa inference was needed for this metric check. The internal project implementation previously gave misleading S-alpha and weighted F-beta values; canonical thesis reporting should use this consistent PySODMetrics table. Its adaptive E-measure is not the same implementation/protocol as the internal continuous \metric{E\_phi}. \src{data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/pysodmetrics\_three\_condition\_table.csv; data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/pysodmetrics\_validation.json; data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/PYSODMETRICS\_VALIDATION.md}
+
+Raw masks have the best S-alpha, weighted F-beta, and adaptive E-measure. Verify reduces negative mask area and improves MAE by only 0.000160225 (raw 0.067364560 versus verify 0.067204336), while lowering the other three CO metrics. Refinement further lowers the reported S-alpha and weighted F-beta and raises MAE to 0.069261117; adaptive E-measure is 0.639741162, still below raw 0.720589303. Thus the detection/rejection layer reduces false-positive masks on negative images but harms aggregate target-present segmentation quality; the refinement branch does not deliver a general segmentation improvement under the consistently recomputed metrics.
+
+\input{tables/pysodmetrics.tex}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/pysodmetrics_grouped_bars.png}
+\caption{Grouped condition comparison for each PySODMetrics measure. Each panel has its own vertical scale; numeric values are also listed in Table~\ref{tab:pysod}. Higher is better for the first three measures; lower is better for MAE.}
+\label{fig:pysod}
+\src{data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/pysodmetrics\_three\_condition\_table.csv}
+\end{figure}
+
+\subsection{Qualitative examples}
+Figure~\ref{fig:qualitative} shows one correctly classified and one misclassified real saved example for each class. The green overlay represents the actual saved raw SINet-V2 candidate mask over the original USC12K image. It is an explanatory display generated from existing image and mask files, not synthetic example content and not a new model output. Exact image and mask file paths, image IDs, true classes, and predicted classes are listed in the referenced CSV.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/qualitative_cases.png}
+\caption{One success and one failure for each class, selected from saved official evaluation predictions. Green tint overlays the raw candidate mask. The underlying source images and masks are real saved USC12K/project files.}
+\label{fig:qualitative}
+\src{data/experiments/usc12k/full/val\_manifest.csv; data/experiments/usc12k/full/feature\_band\_lama\_full/posthoc\_analysis/posthoc\_per\_image.csv; reports/final\_project\_report/tables/qualitative\_cases.csv}
+\end{figure}
+
+\section{Comparison with recent literature}
+\subsection{Realistic and open-world COD}
+The closest benchmark-level comparison is OPC16K/OPCNet. OPC16K explicitly groups camouflaged-object, background-only, and non-camouflaged-object scenes, and OPCNet learns hierarchical existence reasoning alongside segmentation. Our project asks a related open-world question but applies a frozen SINet-V2 mask plus a post-hoc inpainting/residual decision layer. There was no head-to-head OPC16K experiment, and the project artifact records that its official files were unavailable at acquisition time. Consequently, our score cannot be presented as exceeding OPCNet or as an OPC16K benchmark result. The current 0.7122 accuracy on USC12K is a within-project result under a different data source, split mapping, model, and metric protocol. \citep{opc16k}
+
+USC12K/USCNet is the nearest benchmark-context reference because this project evaluates the USC12K official list. USCNet explicitly models relationships between salient and camouflaged content using inter-sample and intra-sample query mechanisms and is trained end to end. Our classifier treats its three mapped labels with a fixed feature-only band and does not implement USCNet's saliency/camouflage reasoning module. We did not rerun USCNet or compare under a matched protocol. Therefore, the defensible relationship is that this report diagnoses a frozen COD baseline on USC12K and tests a post-hoc rejection layer; no superiority claim over USCNet is supported. \citep{usc12k}
+
+RCOD is focused on realistic camouflaged-object detection in the object-detection sense and proposes camouflage-aware feature refinement for boxes. It is not directly comparable with our pixel-level segmentation metrics or USC12K three-way classification. Its relevance is conceptual: it also treats realistic context and feature refinement as central, while this project tests a reconstruction discrepancy after a frozen candidate is proposed. The project downloaded RCOD-D but did not use it as a pixel-mask benchmark. \citep{rcod}
+
+\subsection{Counterfactual and reconstruction-based methods}
+CFCamo is especially relevant and was verified as a real 2026 arXiv preprint. It introduces paired target-present/target-removed counterfactual examples and trains a vision-language policy with a coupled detect-and-abstain objective. Its reported Pair Accuracy is 80.0--90.8\% on CF-COD, but that is a different paired benchmark and metric from our three-way USC12K classification; those numbers are contextual, not a head-to-head comparison. CFCamo's framing reinforces the need to evaluate both detecting true targets and abstaining on target-absent counterfactuals. Our method is much simpler: it creates an inpainted counterfactual for each existing candidate, then scores frozen embedding differences; it does not construct a paired counterfactual benchmark or train a coupled policy. \citep{cfcamo}
+
+Visual Jenga uses counterfactual inpainting to probe object dependencies and scene coherence through progressive removal. It shares the general idea that inpainting can serve as a counterfactual tool, but its question is scene structure and object dependency, not CO/BG/NOCOD classification or mask verification. RUN uses reconstruction-oriented background extraction inside a learned reversible unfolding network for concealed-object segmentation. This makes it technically closer to reconstruction-based segmentation, but RUN is an end-to-end segmentation architecture and does not simply compare the residual of a frozen baseline to decide whether to abstain. Neither paper can be numerically compared to our result without harmonized data, outputs, and protocol. \citep{visualjenga,run}
+
+The recent surveys by Xiao et al. and Zhao et al. situate COD among broader concealed-vision tasks and discuss the dependence on datasets, task definitions, and evaluation design. The main lesson for this project is methodological: open-world presence decisions are not validated by target-present segmentation metrics alone, and source-aware evaluation matters. The small observed AUROC and calibration reversals are therefore not incidental engineering details; they reveal that dataset composition can dominate a hand-tuned residual score. \citep{xiaoSurvey,zhaoSurvey}
+
+\begin{table}[H]
+\centering
+\caption{Qualitative comparison of research scope. No numeric benchmark scores are compared across these papers because tasks, datasets, and metrics differ.}
+\label{tab:literature}
+\begin{tabularx}{\textwidth}{p{2.8cm} p{4.0cm} X}
+\toprule
+Work & Main method/question & Relation to this project \\
+\midrule
+OPC16K / OPCNet & CO/BG/NOCOD benchmark and learned presence-aware segmentation & Same open-world motivation; our work uses USC12K and a frozen baseline, without an OPC16K head-to-head. \\
+USC12K / USCNet & Joint salient/camouflaged scene reasoning and segmentation & Same dataset context; USCNet is end-to-end, our band is post-hoc and feature-only. \\
+RCOD & Realistic camouflaged-object detection with box outputs and CAFR & Related realism objective, but box detection differs from our pixel-mask and three-class outputs. \\
+CFCamo & Paired counterfactual detect-or-abstain policy & Directly aligned in open-world intent; substantially more explicit counterfactual supervision and policy training. \\
+Visual Jenga & Counterfactual inpainting for object dependencies & Shares use of inpainting counterfactuals, but addresses scene dependency rather than camouflage presence. \\
+RUN & Learned reversible RGB/mask unfolding with background extraction & Reconstruction is integrated into a trained segmentation model rather than a post-hoc residual decision. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Revisiting the proposal's questions and assumptions}
+The proposal's central ideas receive mixed support. The strongest positive result is not segmentation improvement; it is that a simple feature-only post-hoc layer can suppress many nonempty raw candidates on the negative classes. The most important negative result is that the class/source association and the CO-versus-NOCOD confusion prevent an interpretation as reliable, source-independent camouflage understanding. Table~\ref{tab:rqs} makes each judgment explicit.
+\input{tables/proposal_questions.tex}
+
+\section{Limitations and risks to the thesis claim}
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{Source/class confounding.} In the USC12K training-derived pools used for development, eligible CO, BG, and NOCOD source families did not overlap. Thus training/holdout performance can reflect source style. The full split also preserves the benchmark's source-to-label construction. The same-source and transfer diagnostics exposed this risk, but do not remove it.
+\item \textbf{Small calibration and holdout samples.} The three-way cuts were selected on 40 images per class and checked on 15 per class. The calibration and holdout accuracies were 0.708 and 0.667, respectively; uncertainty is considerable, and the samples do not support broad claims.
+\item \textbf{Already-inspected evaluation split.} The 3,600-row official evaluation list has already been used for full-run reporting and post-hoc comparisons. Its bootstrap confidence intervals measure class-conditional sampling variation only, not a clean independent confirmation or robustness to a new source family.
+\item \textbf{Segmentation tradeoff and metric correction.} On consistent PySODMetrics values, the raw masks outperform verify/refine on most CO metrics. The internal metric implementation was not suitable for final comparative claims, so this report uses the independent library output.
+\item \textbf{Refinement is not established.} The refined outputs reduce negative mask area further, but CO segmentation quality declines on S-alpha, weighted F-beta, and MAE relative to raw masks. The higher adaptive E than verify does not offset the decline across the other measures.
+\item \textbf{Runtime.} Fresh LaMa inpainting averaged 5.597485009890128 seconds per image on CPU in the saved run. The extra feature/reconstruction pass is therefore a substantial wall-clock cost for a post-hoc layer; a cached refinement timing is not representative of a cold run.
+\item \textbf{No direct prior-work baseline.} No matched inference of USCNet, OPCNet, or an explicit existence-aware baseline was run. Comparison to their published results would be misleading because this project uses another model/checkpoint, class mapping, and evaluation setup.
+\item \textbf{Band simplicity and label mapping.} The rule is a pair of scalar cuts on one pooled residual, ignores spatial residual structure for classification, and collapses USC12K's richer scene semantics into CO/BG/NOCOD. The band can label Scene-C images as CO even when salient content is also present.
+\end{enumerate}
+
+\section{Conclusion and honest assessment}
+The work is substantive enough to support a master's thesis if the thesis is framed as an empirical study of counterfactual post-hoc verification, source confounds, negative rejection, and the detection/segmentation tradeoff. It is not sufficient evidence for a claim of a new state-of-the-art COD method, source-independent camouflage recognition, or segmentation enhancement. The strongest evidence-backed contribution is an audited experimental pipeline and a negative-rejection improvement over an operational raw-mask baseline on the saved USC12K evaluation split: mask-nonempty false acceptance falls from 1.0000 to 0.2883. Fair credit is due for implementing a genuine pretrained embedding residual, identifying a direction inversion rather than silently correcting it, preserving an independent development/holdout procedure before the full run, and validating the segmentation metric table with PySODMetrics.
+
+The central conclusion should remain balanced: the verifier succeeds as a candidate rejection mechanism on this evaluated split, while the evidence does not show that it improves CO segmentation or generalizes independently of dataset source. That tension is a credible thesis result when reported transparently. For a stronger final thesis, the next research work should prioritize source-balanced or source-held-out data, compare against USCNet/OPCNet under their intended metrics once accessible, and pre-register an untouched evaluation design. These would be new experiments; none was run for this report.
+
+\section*{Verification note}
+The requested qualitative grid was possible because the saved manifest, raw candidate masks, and source images exist; no saved full-run preview files were present, so the figure was assembled from those real files. The report does not claim a fresh official test set: the saved manifest identifies the 3,600-image split as \texttt{usc12k\_official\_val}. OPC16K release status is stated only as documented by the project's acquisition-time \texttt{DATASETS.md}. The bibliography contains papers verified through author, conference, or arXiv records; no unverified citations or invented project results are used. The full split and post-hoc result have already been inspected, so all reported intervals are descriptive rather than confirmation on an untouched test set.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

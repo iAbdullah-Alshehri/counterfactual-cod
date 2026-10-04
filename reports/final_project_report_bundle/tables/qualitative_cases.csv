@@ -1,0 +1,7 @@
+true_class,panel_status,image_id,predicted_class,image_file,candidate_mask_file
+CO,SUCCESS,1135,CO,data\raw\usc12k\VOC-USC12K\JPEGImages\1135.jpg,data\experiments\usc12k\full\candidate_masks\1135.png
+CO,FAILURE,1956,NOCOD,data\raw\usc12k\VOC-USC12K\JPEGImages\1956.jpg,data\experiments\usc12k\full\candidate_masks\1956.png
+BG,SUCCESS,COD10K-NonCAM-5-Background-2-Ocean-3139,BG,data\raw\usc12k\VOC-USC12K\JPEGImages\COD10K-NonCAM-5-Background-2-Ocean-3139.jpg,data\experiments\usc12k\full\candidate_masks\COD10K-NonCAM-5-Background-2-Ocean-3139.png
+BG,FAILURE,COD10K-NonCAM-5-Background-2-Ocean-3136,CO,data\raw\usc12k\VOC-USC12K\JPEGImages\COD10K-NonCAM-5-Background-2-Ocean-3136.jpg,data\experiments\usc12k\full\candidate_masks\COD10K-NonCAM-5-Background-2-Ocean-3136.png
+NOCOD,SUCCESS,DUTS-ILSVRC2012_test_00000003,NOCOD,data\raw\usc12k\VOC-USC12K\JPEGImages\DUTS-ILSVRC2012_test_00000003.jpg,data\experiments\usc12k\full\candidate_masks\DUTS-ILSVRC2012_test_00000003.png
+NOCOD,FAILURE,DUTS-ILSVRC2012_test_00000498,CO,data\raw\usc12k\VOC-USC12K\JPEGImages\DUTS-ILSVRC2012_test_00000498.jpg,data\experiments\usc12k\full\candidate_masks\DUTS-ILSVRC2012_test_00000498.png

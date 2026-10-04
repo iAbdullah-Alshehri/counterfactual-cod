@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+\centering
+\caption{Evidence-based answers to the original proposal.}
+\label{tab:rqs}
+\small
+\begin{tabularx}{\textwidth}{L{3.6cm}L{2.2cm}Y}
+\toprule
+\textbf{Proposal question} & \textbf{Assessment} & \textbf{Evidence-based answer} \\
+\midrule
+Can reconstruction discrepancy distinguish CO, BG, and NOCOD? & Partially supported & A frozen two-cut feature band reached 0.7122 three-way accuracy on the saved evaluation split; class/source confounding and CO--NOCOD errors prevent a semantic or source-independent interpretation. \\
+Which residual is most informative? & Partially supported & The ResNet feature residual was useful enough to calibrate a three-way rule, while the original composite direction failed a same-source check and had overfit weights. No controlled source-independent comparison establishes a generally best signal. \\
+Can verification reduce false positives without harming CO segmentation? & Partially supported & Negative false acceptance dropped from 1.0000 for nonempty raw candidates to 0.2883 after verification, but raw masks score higher on three of four PySODMetrics measures and the verifier does not preserve CO mask quality. \\
+Can residual-guided mask refinement improve boundaries? & Not supported & Refine improves neither the full set of reported segmentation measures nor the best raw baseline: S-alpha, weighted F-beta, and MAE are worse than raw. \\
+Can the project compare against existence-aware/detect-or-abstain baselines? & Not answered & USCNet, OPCNet, and CFCamo were reviewed but not run under a matched protocol. No direct superiority claim is supported. \\
+Does the pipeline provide a practical lightweight add-on? & Partially supported & The decision layer is frozen and simple, but the saved CPU run required $2.216\times10^4$ seconds total, including LaMa; cold-run wall time is material. \\
+\bottomrule
+\end{tabularx}
+
+\par\smallskip{\footnotesize Assessment refers to this evaluated split and does not establish source-independent transfer.}
+\end{table}

@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+\centering
+\caption{Feature-band classification on the official evaluation split.}
+\label{tab:classification}
+\small
+\begin{tabular}{lrr}
+\toprule
+\textbf{Measure} & \textbf{Estimate $\uparrow$*} & \textbf{95\% CI} \\
+\midrule
+Three-way accuracy & 0.7122 & [0.6978, 0.7269] \\
+Macro-F1 & 0.7018 & [0.6865, 0.7171] \\
+Balanced accuracy & 0.6965 & [0.6809, 0.7122] \\
+BG recall & 0.6833 & [0.6522, 0.7133] \\
+CO recall & 0.7594 & [0.7389, 0.7811] \\
+NOCOD recall & 0.6467 & [0.6156, 0.6778] \\
+Negative false-acceptance rate & 0.2883 & [0.2678, 0.3089] \\
+Negative rejection accuracy & 0.7117 & Not reported \\
+Binary CO-vs-negative accuracy & 0.7356 & Not reported \\
+CO acceptance rate & 0.7594 & [0.7389, 0.7811] \\
+\bottomrule
+\end{tabular}
+
+\par\smallskip{\footnotesize Class-stratified 95\% intervals; unavailable intervals are marked ``Not reported. *False acceptance is the exception: lower is better ($\downarrow$). Full precision: Appendix~\ref{app:provenance}.}
+\end{table}

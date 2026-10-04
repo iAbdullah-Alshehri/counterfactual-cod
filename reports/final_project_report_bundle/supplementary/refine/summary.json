@@ -1,0 +1,92 @@
+{
+  "n": 6,
+  "co_vs_negative_accuracy": 0.5,
+  "three_way_accuracy": 0.5,
+  "macro_f1": 0.5222222222222223,
+  "confusion_order": [
+    "BG",
+    "CO",
+    "NOCOD"
+  ],
+  "confusion_matrix_true_rows_predicted_columns": [
+    [
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      1,
+      1
+    ]
+  ],
+  "negative_scene_false_accept_rate": 0.5,
+  "negative_scene_rejection_accuracy": 0.5,
+  "co_acceptance_rate": 0.5,
+  "mean_runtime_seconds_per_image": 0.1264286833369018,
+  "mean_inpainting_runtime_seconds_per_image": 5.672107166688268,
+  "cache_hits": 6,
+  "total_runtime_seconds": 2.5894793999905232,
+  "threshold": null,
+  "weights": {
+    "appearance": 0.0,
+    "feature": 1.0,
+    "structural": 0.0
+  },
+  "acceptance_direction": null,
+  "decision_rule": "feature_band",
+  "low_cut": 0.185,
+  "high_cut": 0.285,
+  "mask_refinement_enabled": true,
+  "ablation": "feature_band",
+  "inpainting_backend": "lama",
+  "inpainting_dilation_pixels": 5,
+  "metrics_by_label": {
+    "BG": {
+      "n": 2,
+      "accepted": 0.5,
+      "predicted_mask_area_fraction": 0.010363495908677578,
+      "verification_score": 0.1316831959411502,
+      "residual_combined": 0.1316831959411502
+    },
+    "CO": {
+      "n": 2,
+      "accepted": 0.5,
+      "predicted_mask_area_fraction": 0.003896324895322323,
+      "verification_score": 0.2805372476577759,
+      "residual_combined": 0.2805372476577759,
+      "S_alpha": 0.33226669649562557,
+      "weighted_F_beta": 0.47430744358153787,
+      "E_phi": 0.6226402819156647,
+      "MAE": 0.015297011472284794
+    },
+    "NOCOD": {
+      "n": 2,
+      "accepted": 0.5,
+      "predicted_mask_area_fraction": 0.020695671439170837,
+      "verification_score": 0.28644314408302307,
+      "residual_combined": 0.28644314408302307
+    }
+  },
+  "metrics_by_split": {
+    "usc12k_official_val": {
+      "n": 6,
+      "accepted": 0.5,
+      "predicted_mask_area_fraction": 0.01165183074772358,
+      "verification_score": 0.23288786256064972,
+      "residual_combined": 0.23288786256064972,
+      "S_alpha": 0.33226669649562557,
+      "weighted_F_beta": 0.47430744358153787,
+      "E_phi": 0.6226402819156647,
+      "MAE": 0.015297011472284794
+    }
+  },
+  "note": "Feature-only three-way band: BG below low_cut, CO within the inclusive band, NOCOD above high_cut.",
+  "resumed_images": 0,
+  "progress_checkpoint": "C:\\Users\\a8aye\\Documents\\Codex\\2026-09-23\\there-is-a-proposal-file-in\\outputs\\counterfactual-cod\\reports\\final_project_report\\supplementary\\refine\\per_image.progress.csv"
+}
